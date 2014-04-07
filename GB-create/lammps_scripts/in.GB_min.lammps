@@ -1,0 +1,47 @@
+ # ---------- Define Settings --------------------- 
+compute csym all centro/atom bcc
+compute eng all pe/atom 
+compute eatoms all reduce sum c_eng 
+compute stress all stress/atom 
+compute ack all ackland/atom
+variable sigmaxx atom c_stress[1]/vol*atoms*1e-4
+variable sigmayy atom c_stress[2]/vol*atoms*1e-4
+variable sigmazz atom c_stress[3]/vol*atoms*1e-4
+variable sigmaxy atom c_stress[4]/vol*atoms*1e-4
+variable sigmaxz atom c_stress[5]/vol*atoms*1e-4
+variable sigmayz atom c_stress[6]/vol*atoms*1e-4
+# ---------- Run Minimization --------------------- 
+reset_timestep 0 
+thermo 10 
+thermo_style custom step pe lx ly lz press pxx pyy pzz c_eatoms
+thermo_modify format float %15.8f 
+min_style cg 
+minimize ${etol} ${ftol} ${maxiter} ${maxeval} 
+
+# ---------- Run Minimization 2--------------------- 
+# Now allow the box to expand/contract perpendicular to the grain boundary
+reset_timestep 0 
+thermo 10 
+fix min all box/relax y 0.0 vmax 1e-3
+min_style cg 
+minimize ${etol} ${ftol} ${maxiter} ${maxeval} 
+ 
+# ---------- Calculate GB Energy --------------------- 
+variable esum equal "v_minimumenergy * count(all)" 
+variable tol_eng equal "c_eatoms"
+variable xseng equal "c_eatoms - (v_minimumenergy * count(all))" 
+variable gbarea equal "vol/ly*2" 
+variable gbe equal "(c_eatoms - (v_minimumenergy * count(all)))/v_gbarea" 
+variable gbemJm2 equal ${gbe}*16021.7733 
+variable gbernd equal round(${gbemJm2}) 
+variable cohe equal "v_surfemJm2*2-v_gbemJm2"
+print "After minimization:" 
+print "GB energy is ${gbemJm2} mJ/m^2" 
+run 0
+# ---------- Dump data into Data file ------------- 
+reset_timestep 0 
+timestep 0.001 
+dump 1 all custom 1000 temp.lammpstrj id type x y z vx vy vz fx fy fz c_eng v_sigmaxx v_sigmayy v_sigmazz v_sigmaxy v_sigmaxz v_sigmayz c_csym c_ack
+# fix extra all print 1 "${counter} ${angle} ${sig} ${tx} ${tz} ${gbemJm2} ${surfemJm2} ${cohe}" append temp.txt screen no title " " 
+run 1
+

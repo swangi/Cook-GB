@@ -1,0 +1,34 @@
+#creation of 100 tilt STGB!
+#By swang@i2cner
+variable Gy equal "v_ycell*v_ysize* v_latparam"
+variable Gx equal "v_xcell*v_xsize* v_latparam"
+variable Gz equal "v_zcell*v_zsize* v_latparam"
+# ---------- Initialize Simulation --------------------- 
+clear 
+units metal 
+boundary p p p 
+atom_style atomic 
+# ---------- Create Atomistic Structure --------------------- 
+lattice bcc ${latparam} 
+region whole block 0 ${Gx} -$(v_Gy) ${Gy} 0 ${Gz} units box
+create_box 2 whole 
+region upper block INF INF 0.000000 ${Gy} INF INF units box
+lattice bcc ${latparam} orient x ${x1} ${x2} ${x3} orient y ${y1} ${y2} ${y3} orient z ${z1} ${z2} ${z3} 
+create_atoms 1 region upper 
+region lower block INF INF -$(v_Gy) 0.0000 INF INF units box
+lattice bcc ${latparam} orient x ${x1p} ${x2p} ${x3p} orient y ${y1p} ${y2p} ${y3p} orient z ${z1p} ${z2p} ${z3p}
+create_atoms 1 region lower 
+group upper region upper
+group lower region lower  
+# ---------- Define Interatomic Potential --------------------- 
+pair_style   ${pair}
+pair_coeff   * * ${potfile}
+#neighbor 2.0 bin 
+#neigh_modify delay 10 check yes 
+neigh_modify delay 0 every 1
+#----------- Adding Hydrogen-----------------------------------
+#create_atoms    2 single 0.5 0 0.25
+# ---------- Displace atoms and delete overlapping atoms --------------------- 
+displace_atoms upper move ${tx} 0 ${tz}
+if "$d == 1" then "delete_atoms overlap ${overlapdist} lower upper" 
+if "$d == 2" then "delete_atoms overlap ${overlapdist} upper lower"  

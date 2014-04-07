@@ -1,0 +1,42 @@
+#------------Surface calculation--------------#
+clear
+units metal 
+boundary p s p 
+atom_style atomic  
+lattice bcc ${latparam} 
+region surf block 0 10 -0.5 10.5 0 10
+create_box 2 surf 
+region small block INF INF 0 10  INF INF 
+lattice bcc ${latparam} orient x ${x1} ${x2} ${x3} orient y ${y1} ${y2} ${y3} orient z ${z1} ${z2} ${z3} 
+create_atoms 1 region small 
+# ---------- Define Interatomic Potential --------------------- 
+pair_style   ${pair}
+pair_coeff   * * ${potfile}
+#neighbor 2.0 bin 
+#neigh_modify delay 10 check yes 
+neigh_modify delay 0 every 1
+# ---------- Define Settings --------------------- 
+compute csym all centro/atom bcc
+compute eng all pe/atom 
+compute eatoms all reduce sum c_eng 
+compute stress all stress/atom 
+compute ack all ackland/atom
+variable sigmaxx atom c_stress[1]/vol*atoms*1e-4
+variable sigmayy atom c_stress[2]/vol*atoms*1e-4
+variable sigmazz atom c_stress[3]/vol*atoms*1e-4
+variable sigmaxy atom c_stress[4]/vol*atoms*1e-4
+variable sigmaxz atom c_stress[5]/vol*atoms*1e-4
+variable sigmayz atom c_stress[6]/vol*atoms*1e-4
+# ---------- Run surface Minimization ------------------- 
+reset_timestep 0 
+thermo 10 
+thermo_style custom step pe lx ly lz press pxx pyy pzz c_eatoms
+thermo_modify format float %15.8f 
+min_style cg 
+minimize ${etol} ${ftol} ${maxiter} ${maxeval} 
+variable surfarea equal "vol/ly*2" 
+variable surfe equal "(c_eatoms - (v_minimumenergy * count(all)))/v_surfarea" 
+variable surfemJm2 equal ${surfe}*16021.7733 
+variable surfernd equal round(${surfemJm2}) 
+print "After minimization:" 
+print "Surface energy is ${surfemJm2} mJ/m^2"
