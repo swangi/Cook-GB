@@ -1,0 +1,8 @@
+variable y_up equal ly/2-10#1*ly/2
+variable y_low equal -ly/2+10#-1*ly/2
+region		lower block INF INF INF ${y_low} INF INF units box
+region		upper block INF INF ${y_up} INF INF INF units box
+group		lower region lower
+group		upper region upper
+group		boundary union lower upper
+group		mobile subtract all boundary

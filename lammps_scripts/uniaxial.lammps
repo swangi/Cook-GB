@@ -1,0 +1,16 @@
+# -----------Thermostat-----------
+reset_timestep 0 
+fix nvt all nvt temp $T $T 0.1 drag 1
+variable srate1 equal "v_srate / 1.0e12"
+fix deform all deform 1 y erate ${srate1} units box remap x
+# Output strain and stress info to file
+# for units metal, pressure is in [bars] = 100 [kPa] = 1/10000 [GPa]
+# p2, p3, p4 are in GPa
+variable strain equal "(ly - v_W1)/v_W1"
+variable displace equal "ly - v_W1"
+variable p0 equal "v_displace"
+variable p1 equal "v_strain"
+variable p2 equal "-pxx/10000"
+variable p3 equal "-pyy/10000"
+variable p4 equal "-pzz/10000"
+fix record all print 10 "${p0} ${p1} ${p2} ${p3} ${p4}" file tension_record.txt screen no

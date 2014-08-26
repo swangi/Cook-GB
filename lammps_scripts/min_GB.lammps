@@ -1,0 +1,13 @@
+# ---------- Run Minimization --------------------- 
+reset_timestep 0 
+min_style cg 
+minimize ${etol} ${ftol} ${maxiter} ${maxeval} 
+
+# ---------- Run Minimization 2--------------------- 
+# Now allow the box to expand/contract perpendicular to the grain boundary
+reset_timestep 0 
+fix min all box/relax y 0.0 vmax 1e-3
+min_style cg 
+minimize ${etol} ${ftol} ${maxiter} ${maxeval} 
+unfix min
+

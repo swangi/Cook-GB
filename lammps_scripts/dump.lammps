@@ -1,0 +1,4 @@
+dump ${dump_id} all custom ${dump_step} ${dump_name}.lammpstrj id type x y z vx vy vz fx fy fz c_eng v_sigmaxx v_sigmayy v_sigmazz v_sigmaxy v_sigmaxz v_sigmayz c_csym c_ack
+
+
+

@@ -1,0 +1,4 @@
+region upper block INF INF 0.000000 INF INF INF units box
+group upper region upper
+change_box all y delta 0 100 units box
+displace_atoms upper move 0 100 0 units box

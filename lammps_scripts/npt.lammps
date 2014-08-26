@@ -1,0 +1,4 @@
+# -----------Thermostat-----------
+reset_timestep 0 
+fix npt all npt temp $T $T 0.1 iso 0 0 1.0 drag 1
+

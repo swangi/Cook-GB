@@ -1,0 +1,5 @@
+variable disp equal ${init_sr}*${W0}/2
+#fix deform all deform 1 y delta -${disp} ${disp} units box
+#run 1
+#unfix deform
+change_box all y delta -${disp} ${disp} remap units box 

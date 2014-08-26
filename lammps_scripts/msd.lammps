@@ -1,0 +1,4 @@
+group A type 2
+compute D A msd
+thermo_style custom step temp ke pe enthalpy etotal lx ly lz press pxx pyy pzz c_D[1] c_D[2] c_D[3] c_D[4]
+thermo_modify format float %15.8f 

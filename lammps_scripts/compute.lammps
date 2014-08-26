@@ -1,0 +1,14 @@
+compute csym all centro/atom bcc
+compute eng all pe/atom 
+compute eatoms all reduce sum c_eng 
+compute stress all stress/atom NULL
+compute ack all ackland/atom
+variable sigmaxx atom c_stress[1]/vol*atoms*1e-4 
+variable sigmayy atom c_stress[2]/vol*atoms*1e-4
+variable sigmazz atom c_stress[3]/vol*atoms*1e-4
+variable sigmaxy atom c_stress[4]/vol*atoms*1e-4
+variable sigmaxz atom c_stress[5]/vol*atoms*1e-4
+variable sigmayz atom c_stress[6]/vol*atoms*1e-4
+variable area equal vol/ly
+variable pot equal pe
+

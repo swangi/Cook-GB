@@ -1,0 +1,42 @@
+# ---------- Define Interatomic Potential --------------------- 
+pair_style   ${pair}
+pair_coeff   * * ${potfile}
+atom_modify	sort 0 0.0
+ # ---------- Define Settings --------------------- 
+compute csym all centro/atom bcc
+compute eng all pe/atom 
+compute eatoms all reduce sum c_eng 
+compute stress all stress/atom NULL
+compute ack all ackland/atom
+compute	new3d all temp
+compute D A msd
+variable msd4 equal c_D[4] 
+variable sigmaxx atom c_stress[1]/vol*atoms*1e-4
+variable sigmayy atom c_stress[2]/vol*atoms*1e-4
+variable sigmazz atom c_stress[3]/vol*atoms*1e-4
+variable sigmaxy atom c_stress[4]/vol*atoms*1e-4
+variable sigmaxz atom c_stress[5]/vol*atoms*1e-4
+variable sigmayz atom c_stress[6]/vol*atoms*1e-4
+thermo_style custom step temp etotal ke pe enthalpy press pxx pyy pzz vol c_D[1] c_D[2] c_D[3] c_D[4]
+thermo_modify format float %15.8f 
+# ---------- Run Minimization --------------------- 
+reset_timestep 0 
+thermo 10 
+min_style cg 
+minimize ${etol} ${ftol} ${maxiter} ${maxeval} 
+# -----------Thermostat-----------
+reset_timestep 0 
+thermo 10 
+timestep 0.001
+velocity all create ${T2} 5812775 temp new3d units box
+#fix 1 all npt temp $T $T 0.1 iso 0 0 1.0 drag 1
+fix 1 all nvt temp $T $T 0.1 drag 1
+fix  3 all temp/rescale 10 $T $T 0.1 1.0
+fix_modify	3 temp new3d
+thermo_modify	temp new3d
+#fix 2 gas gcmc 10 1000 1000 2 29494 298.0 -0.5 0.01
+#fix 3 all press/berendsen iso 100.0 100.0 1000.0
+# ---------- Dump data into Data file ------------- 
+dump 1 all custom 100 temp.lammpstrj id type x y z vx vy vz fx fy fz c_eng v_sigmaxx v_sigmayy v_sigmazz v_sigmaxy v_sigmaxz v_sigmayz c_csym c_ack
+# dump 2 all molfile 10 temp.pdb pdb .
+# fix extra all print 1 "${counter} ${angle} ${sig} ${tx} ${tz} ${gbemJm2} ${surfemJm2} ${cohe}" append temp.txt screen no title " " 

@@ -1,0 +1,2 @@
+reset_timestep 0 
+fix nvt all nvt temp $T $T 0.1 drag 1

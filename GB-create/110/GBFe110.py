@@ -14,7 +14,7 @@ import GBindex
 def mkdir_p(path):
     try:
         os.makedirs(path)
-    except os.error as e:
+    except os.error, e:
         if e.errno != 17:
             raise
         else:
@@ -24,7 +24,7 @@ def mkdir_p(path):
 def rename_p(old, new):
     try:
         os.rename(old, new)
-    except os.error as e:
+    except os.error, e:
         if e.errno != 2:
             raise
         else:
@@ -34,10 +34,10 @@ import pypar
 myid = pypar.rank()
 nprocs = pypar.size()
 node = pypar.get_processor_name()
-mlist = GBindex.mlist_100
-nlist = GBindex.nlist_100
-sigmalist = GBindex.sigmalist_100
-anglelist = GBindex.angle_100
+mlist = GBindex.mlist_110
+nlist = GBindex.nlist_110
+sigmalist = GBindex.sigmalist_110
+anglelist = GBindex.angle_110
 num = len(mlist)
 ydis = 60
 xcell = 3
@@ -54,17 +54,17 @@ etol = "1.0e-15"
 surfelist = []
 
 counter = 0
-# if not os.path.exists("Results"): os.makedirs("Results")
+#if not os.path.exists("Results"): os.makedirs("Results")
 if myid == 0:
     mkdir_p("Results")
-# -------------------Input EAM pot---------------------------------
+#-------------------Input EAM pot---------------------------------
 pair = "eam/fs"
-potfile = "/home/wang/potentials/eam/PotentialA3410-song.fs Fe H"
-# potfile="/home/wang/potentials/eam/PotentialB3410.fs Fe H"
-# ------------------Input MEAM pot--------------------------------
+# potfile = "/home/wang/potentials/eam/PotentialA3410-song.fs Fe H"
+potfile = "/home/wang/potentials/eam/PotentialB3410.fs Fe H"
+#------------------Input MEAM pot--------------------------------
 # pair="meam"
-# potfile="/home/wang/potentials/meam/lib-fe-p.meam Fe /home/wang/potentials/meam/Fe-meam-p.meam Fe"
-# --------------------Para for lammpsrunning------------------------------
+#potfile="/home/wang/potentials/meam/lib-fe-p.meam Fe /home/wang/potentials/meam/Fe-meam-p.meam Fe"
+#--------------------Para for lammpsrunning------------------------------
 # screen is not good look, rev me when needed
 lmp = lammps("", ["-screen", "none"])
 lmp.command("variable pair string %s" % (pair))
@@ -73,7 +73,7 @@ lmp.command("variable maxiter equal %d" % (maxiter))
 lmp.command("variable maxeval equal %d" % (maxeval))
 lmp.command("variable ftol equal %s" % (ftol))
 lmp.command("variable etol equal %s" % (etol))
-# ------------------Minimization of unitslab--------------------------------
+#------------------Minimization of unitslab--------------------------------
 lines = open("lammps_scripts/in.unitslab.lammps", 'r').readlines()
 for line in lines:
     lmp.command(line)
@@ -90,14 +90,14 @@ for i in np.arange(num):
     counterlist = []
     tolnum = 0
     tolnumlist = []
-    # ---------------folder for results---------------------------------
+     #---------------folder for results---------------------------------
     file_name = "Fe_S%d_(%d_%d_%d)_%dA_STGB" % (
-        sigmalist[i], mlist[i], nlist[i], 0, ydis)
-    # if not os.path.exists("Results/"+file_name): os.makedirs("Results/"+file_name)
+        sigmalist[i], mlist[i], mlist[i], nlist[i], ydis)
+    #if not os.path.exists("Results/"+file_name): os.makedirs("Results/"+file_name)
     if myid == 0:
         mkdir_p("Results/" + file_name)
     vari = [
-        # ----------------variables defined by python------------------------
+        #----------------variables defined by python------------------------
         "variable ydis equal %d" % (ydis),
         "variable m equal %d" % (mlist[i]),
         "variable n equal %d" % (nlist[i]),
@@ -112,26 +112,26 @@ for i in np.arange(num):
         "variable overlapboth equal %d" % (overlapboth),
         "variable minimumenergy equal %f" % (unite),
         "variable latparam equal %f" % (latparam),
-        # ---------------orientation!----------------------------
+        #---------------orientation!----------------------------
         "variable x1 equal ${n}",
-        "variable x2 equal -${m}",
-        "variable x3 equal 0",
+        "variable x2 equal -${n}",
+        "variable x3 equal  2*${m}",
         "variable y1 equal ${m}",
-        "variable y2 equal ${n}",
-        "variable y3 equal 0",
-        "variable x1p equal ${n}",
-        "variable x2p equal ${m}",
-        "variable x3p equal 0",
-        "variable y1p equal -${m}",
-        "variable y2p equal ${n}",
-        "variable y3p equal 0",
-        "variable z1 equal 0",
-        "variable z2 equal 0",
-        "variable z3 equal 1",
-        "variable z1p equal 0",
-        "variable z2p equal 0",
-        "variable z3p equal 1",
-        # -----------------other important paras-----------------------
+        "variable y2 equal -${m}",
+        "variable y3 equal -${n}",
+        "variable x1p equal -${n}",
+        "variable x2p equal ${n}",
+        "variable x3p equal 2*${m}",
+        "variable y1p equal ${m}",
+        "variable y2p equal -${m}",
+        "variable y3p equal ${n}",
+        "variable z1 equal 1",
+        "variable z2 equal 1",
+        "variable z3 equal 0",
+        "variable z1p equal 1",
+        "variable z2p equal 1",
+        "variable z3p equal 0",
+        #-----------------other important paras-----------------------
         'variable ysize equal "sqrt(v_y1^2 + v_y2^2 + v_y3^2)"',
         'variable xsize1 equal "sqrt(v_x1^2 + v_x2^2 + v_x3^2)"',
         'variable zsize1 equal "sqrt(v_z1^2 + v_z2^2 + v_z3^2)"',
@@ -154,7 +154,7 @@ for i in np.arange(num):
     lmp.command('variable surfemJm2 equal %f' % (surfe))
     surfelist.append(surfe)
     # --------------GB calculation deck--------------------------
-    # --------------define grid displacement unit vector-------------
+    #--------------define grid displacement unit vector-------------
     xlen = lmp.extract_variable("xlen", "all", 0)
     zlen = lmp.extract_variable("zlen", "all", 0)
     xsize = lmp.extract_variable("xsize", "all", 0)
@@ -177,17 +177,15 @@ for i in np.arange(num):
         for b in np.arange(zinc):
             tz = a / zinc * zsize
             lmp.command('variable tz equal %f' % (tz))
-            lmp.command(
-                'variable d equal %f' %
-                (overlapboth))  # not for non-sym
+            # not for non-sym
+            lmp.command('variable d equal %f' % (overlapboth))
             for c in overlapdist:
                 tolnum += 1
                 lmp.command('variable overlapdist equal %f' % (c))
                 if c == 0.275 * latparam:
                     natoms_pre = 1
                 lines = open(
-                    "lammps_scripts/in.GB_create.lammps",
-                    'r').readlines()
+                    "lammps_scripts/in.GB_create.lammps", 'r').readlines()
                 for line in lines:
                     lmp.command(line)
                 # print "read"
@@ -198,12 +196,11 @@ for i in np.arange(num):
                     natoms_pre = natoms
                     lmp.command('variable counter equal %d' % (counter))
                     lines = open(
-                        "lammps_scripts/in.GB_min.lammps",
-                        'r').readlines()
+                        "lammps_scripts/in.GB_min.lammps", 'r').readlines()
                     for line in lines:
                         lmp.command(line)
-                        #lmp.command('variable tx delete')
-                        #lmp.command('variable tz delete')
+                    # lmp.command('variable tx delete')
+       #              lmp.command('variable tz delete')
                     gbemJm2 = lmp.extract_variable("gbemJm2", "all", 0)
                     gbelist.append(gbemJm2)
                     cohe = lmp.extract_variable("cohe", "all", 0)
@@ -216,23 +213,22 @@ for i in np.arange(num):
                         print trjname
                         print "................"
                         rename_p(
-                            "temp.lammpstrj",
-                            "Results/" +
-                            file_name +
-                            "/" +
-                            trjname)
+                            "temp.lammpstrj", "Results/" + file_name + "/" + trjname)
                         f = open('temp_results.txt', 'a')
-                        f.write(
-                            '%f\t%f\t%f\t%f\t%d\t%f\t%f\n' %
-                            (anglelist[i], gbemJm2, surfe, cohe, tolnum, tx, tz))
+                        f.write('%f\t%f\t%f\t%f\t%d\t%f\t%f\n'
+                                % (anglelist[i], gbemJm2, surfe, cohe, tolnum, tx, tz))
                         f.close
     # ---------------Sort results-------------------------------
     if myid == 0:
         print "Total number of model is %d, we took %d" % (tolnum, counter)
         f = open('temp_results.txt', 'r')
         data = np.genfromtxt('temp_results.txt', names=True)
+                # print data
+                # print data['GB_energy']
         i = np.argmin(np.abs(data['GB_energy']))
+                # print i
         min_angle = data['Angle'][i]
+                # print min_angle
         min_gb = data['GB_energy'][i]
         min_surf = data['Surf_energy'][i]
         min_coh = data['Coh_energy'][i]
@@ -240,24 +236,16 @@ for i in np.arange(num):
         min_x = data['X'][i]
         min_z = data['Z'][i]
         f.close
+                # g = open('GB', 'a')
+                # g.write('%f\t%f \n' %(min_angle,min_gb))
+                # g.close
         print 'The ID of optimized GB is %d\nLowest GB energy is %f, Cohensive energy is %f' % (min_cont, min_gb, min_coh)
         f = open('all-GBs.txt', 'a')
-        f.write(
-            '%f\t%f\t%f\t%f\t%d\t%f\t%f\n' %
-            (min_angle,
-             min_gb,
-             min_surf,
-             min_coh,
-             min_cont,
-             min_x,
-             min_z))
+        f.write('%f\t%f\t%f\t%f\t%d\t%f\t%f\n'
+                % (min_angle, min_gb, min_surf, min_coh, min_cont, min_x, min_z))
         f.close
         mintrjname = glob.glob(
-            "Results/" +
-            file_name +
-            "/" +
-            "*_%d.lammpstrj" %
-            (min_cont))
+            "Results/" + file_name + "/" + "*_%d.lammpstrj" % (min_cont))
                 # print mintrjname
         shutil.copy2(mintrjname[0], "Results/" + file_name + ".lammpstrj")
         newlog_GB = "Results/" + file_name + "/log." + file_name + ".lammps"

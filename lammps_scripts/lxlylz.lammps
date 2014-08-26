@@ -1,0 +1,7 @@
+variable L equal "lx"
+variable W equal "ly"
+variable H equal "lz"
+variable L0 equal $L
+variable W0 equal $W
+variable H0 equal $H
+

@@ -1,0 +1,9 @@
+# -----------cut potential interaction of two groups-----------
+variable cutlx1 equal ${L0}/2-5
+variable cutlx2 equal ${L0}/2+5
+
+region		cutlow block ${cutlx1} ${cutlx2} -10 ${cut_pos} INF INF units box
+region		cutup block ${cutlx1} ${cutlx2} ${cut_pos} 10 INF INF units box
+group		cutlow region cutlow
+group		cutup region cutup
+neigh_modify exclude group cutlow cutup

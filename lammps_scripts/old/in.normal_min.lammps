@@ -1,0 +1,9 @@
+reset_timestep 0 
+thermo 10
+min_style cg 
+dump normal all custom 100 temp.lammpstrj id type x y z vx vy vz fx fy fz c_eng v_sigmaxx v_sigmayy v_sigmazz v_sigmaxy v_sigmaxz v_sigmayz c_csym c_ack
+minimize ${etol} ${ftol} ${maxiter} ${maxeval} 
+fix min1 all box/relax iso 0.0 vmax 0.01
+minimize ${etol} ${ftol} ${maxiter} ${maxeval} 
+unfix min1
+
